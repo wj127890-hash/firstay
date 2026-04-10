@@ -86,7 +86,7 @@ export default function MobileCalendar() {
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               className="w-full h-40 p-4 bg-gray-50 rounded-3xl border-2 border-gray-100 text-lg focus:border-orange-500 outline-none transition-all text-black"
-              placeholder="이모님께 남길 지시사항..."
+              placeholder="혜빈님께 공유드립니다."
             />
             <button 
               onClick={handleSaveMemo}
