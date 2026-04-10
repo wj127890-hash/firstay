@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-// ⚠️ 여기에 에어비앤비에서 복사한 긴 주소를 따옴표 사이에 꼭 넣어주세요!
+// ⚠️ [중요] 아래 따옴표 안에 에어비앤비에서 복사한 주소를 처음부터 끝까지 다 넣어주세요!
 const AIRBNB_ICAL_URL = "https://www.airbnb.co.kr/calendar/ical/1449092803394676993.ics?t=ae54c99940fb41e998f0b0b30f34e0ea";
 
 export default function Calendar() {
@@ -12,30 +12,27 @@ export default function Calendar() {
 
   useEffect(() => {
     async function fetchCalendar() {
+      if (AIRBNB_ICAL_URL.includes("여기에")) return;
       try {
-        // 보안 우회 통로를 통해 에어비앤비 데이터를 읽어옵니다
         const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(AIRBNB_ICAL_URL)}`);
         const data = await response.json();
         const icsText = data.contents;
-
         const dates: string[] = [];
-        const lines = icsText.split('\n');
+        const lines = icsText.split(/\r?\n/);
         
         lines.forEach((line: string) => {
-          if (line.startsWith('DTEND')) {
-            const datePart = line.split(':')[1]?.trim(); 
-            if (datePart) {
-              // 20260412 형식에서 날짜만 추출
-              const y = datePart.slice(0, 4);
-              const m = datePart.slice(4, 6);
-              const d = datePart.slice(6, 8);
-              dates.push(`${y}-${parseInt(m)}-${parseInt(d)}`);
+          if (line.includes('DTEND')) {
+            const match = line.match(/\d{8}/);
+            if (match) {
+              const s = match[0];
+              // 연-월-일 형식을 일치시킵니다.
+              dates.push(`${parseInt(s.slice(0,4))}-${parseInt(s.slice(4,6))}-${parseInt(s.slice(6,8))}`);
             }
           }
         });
         setCheckoutDates(dates);
       } catch (e) {
-        console.error("데이터 가져오기 실패:", e);
+        console.error("연동 실패:", e);
       }
     }
     fetchCalendar();
@@ -53,7 +50,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-gray-50 pb-10">
+    <div className="max-w-md mx-auto min-h-screen bg-gray-50 pb-10 font-sans">
       <div className="bg-orange-600 text-white p-8 rounded-b-[40px] shadow-lg text-center">
         <div className="flex justify-between items-center mb-2">
           <button onClick={prevMonth}><ChevronLeft size={30} /></button>
@@ -97,8 +94,7 @@ export default function Calendar() {
               <h3 className="text-xl font-bold">{selectedDate} 메모</h3>
               <button onClick={() => setSelectedDate(null)} className="text-gray-400"><X size={28}/></button>
             </div>
-
-            <textarea className="w-full h-40 p-4 border-2 border-orange-100 rounded-2xl outline-none focus:border-orange-500 text-lg" placeholder="혜빈님께 공유드립니다" />
+            <textarea className="w-full h-40 p-4 border-2 border-orange-100 rounded-2xl outline-none focus:border-orange-500 text-lg" placeholder="이모님께 남길 다정한 한마디..." />
             <button className="w-full bg-orange-600 text-white font-bold py-4 rounded-2xl mt-4 text-xl shadow-lg">저장하기</button>
           </div>
         </div>
